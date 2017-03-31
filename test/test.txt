@@ -1,0 +1,3 @@
+/home/hayashis/git/autohpss/autopass.sqlite 
+/home/hayashis/git/autohpss/config.js 
+/home/hayashis/git/autohpss/index.js

@@ -1,0 +1,16 @@
+{
+  "name": "autohpss",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Soichi Hayashi <hayashis@iu.edu> (http://soichi.us)",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.2.0",
+    "sqlite3": "^3.1.8",
+    "winston": "^2.3.1"
+  }
+}
