@@ -6,10 +6,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "archive": "./archive.js",
+    "restore": "./restore.js"
+  },
   "author": "Soichi Hayashi <hayashis@iu.edu> (http://soichi.us)",
   "license": "ISC",
   "dependencies": {
+    "assert": "^1.4.1",
     "async": "^2.2.0",
+    "mkdirp": "^0.5.1",
     "sqlite3": "^3.1.8",
     "winston": "^2.3.1"
   }
