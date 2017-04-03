@@ -12,7 +12,7 @@ const logger = new winston.Logger(config.logger.winston);
 
 var path = process.argv[2];
 if(!path) {
-    console.log("Please specify path (filename or directory) to restore");
+    logger.error("Please specify path (filename or directory) to restore");
     process.exit(1);
 }
 
