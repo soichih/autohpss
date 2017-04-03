@@ -7,8 +7,18 @@ The simplest, most straightforward way to archive and restore stuff to/from HPSS
 This system assumes you have HPSS(SDA) access..
 > https://kb.iu.edu/d/alja 
 
-and you have keytab based authentication configured. If you don
+and you have keytab based authentication configured.
 > https://kb.iu.edu/d/aumh
+
+Once configured, you should be able to run `hsi ls` without entering user/pass.
+
+```
+$ module load hpss
+$ hsi ls
+/hpss/h/a/hayashis:
+_test/          backup/         chunk/          Soichi's Test/  test.tar        
+autohpss/       barn.tar        isos/           test/           
+```
 
 If you have question on how to do this, please contact me.
 
