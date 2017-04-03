@@ -1,13 +1,5 @@
 const winston = require('winston');
 
-//list of directories that you want to archive (all files / directories will be archived recursively)
-exports.rootdirs = [
-    "/N/u/hayashis/Karst/testdata",
-    "/N/dc2/projects/o3d",
-];
-
-
-//you should have to change this, but just in case
 exports.batch_size =  1024*1024*1024*30; //30GB
 exports.sqlite_path = process.env.HOME+"/autopass.sqlite";
 exports.hpss_path = "autohpss"

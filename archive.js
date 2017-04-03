@@ -5,28 +5,62 @@ const winston = require('winston');
 const config = require('./config');
 const sqlite3 = require('sqlite3');
 const async = require('async');
+const path = require('path');
 
 const spawn = require('child_process').spawn;
 const logger = new winston.Logger(config.logger.winston);
 
-logger.info("--- autohpss archiver ---");
 
 var db = new sqlite3.Database(config.sqlite_path);
 db.serialize(()=>{
     db.run("CREATE TABLE IF NOT EXISTS files (path TEXT, mtime INTEGER, tarid INTEGER)");
-    db.run("CREATE INDEX files_index ON files (path,mtime)");
+    db.run("CREATE INDEX IF NOT EXISTS files_index ON files (path,mtime)");
 });
 
-logger.info("walking directories to find files that are not archived");
+var rootdir = process.argv[2];
+if(!rootdir) {
+    logger.error("Please specify directory name to archive");
+    process.exit(1);
+}
+if(!path.isAbsolute(rootdir)) {
+    logger.error("Please specify an absolute path");
+    process.exit(1);
+}
+
+fs.stat(rootdir, (err, stats)=>{
+    if(err) throw err;
+    if(!stats.isDirectory()) {
+        logger.error(rootdir,"is not a directory");
+        process.exit(1);
+    }
+    walk(rootdir, handle_batch, function(err) {
+        if(err) logger.error(err);
+        handle_batch(function(err) {
+            if(err) logger.error(err);
+            logger.info("closing..");
+            db.close(function() {
+                logger.info("closed");
+            });
+        });
+    });
+});
+
+/*
+logger.info("walking directories to find files that needs to be archived");
 async.eachSeries(config.rootdirs, function(rootdir, next_dir) {
     walk(rootdir, handle_batch, next_dir);
 }, function(err) {
     if(err) logger.error(err);
-    handle_batch(function() {
+    handle_batch(function(err) {
+        if(err) logger.error(err);
         logger.info("closing..");
-        db.close();
+        db.close(function() {
+            logger.info("closed");
+        });
     });
 });
+*/
+
 
 //jvar last_run_date = new Date();
 //last_run_date.setDate(last_run_date.getDate()-10);
@@ -37,7 +71,7 @@ async.eachSeries(config.rootdirs, function(rootdir, next_dir) {
 var total_size = 0;
 var newfiles = [];
 function walk(path, full, done) {
-    logger.debug(path);
+    logger.debug("readdir", path);
     fs.readdir(path, (err, files)=> {
         if(err) return done(err);
         async.eachSeries(files, function(file, next_file) {
@@ -71,7 +105,12 @@ function walk(path, full, done) {
 }
 
 function handle_batch(cb) {
-    console.log("processing batch.. ", total_size, newfiles.length);
+    if(newfiles.length == 0) {
+        logger.info("nothing to archive");
+        return;
+    }
+
+    logger.log("processing batch.. ", total_size, newfiles.length);
 
     //get next max tarid
     db.get("SELECT max(tarid) as max FROM files", function(err, row) {
@@ -94,14 +133,14 @@ function handle_batch(cb) {
 
             //store filelists to db
             db.serialize(()=>{
-                loggder.debug("storing files to db");
+                logger.debug("storing files to db");
                 var stmt = db.prepare("INSERT INTO files VALUES (?, ?, ?)");
                 newfiles.forEach((file)=>{
                     stmt.run(file.path, file.mtime, next_tarid);
                 });
                 stmt.finalize(); //blocking?
             });
-            loggder.debug("done storing files to db");
+            logger.debug("done storing files to db");
 
             total_size = 0;
             newfiles = [];
