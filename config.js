@@ -1,7 +1,7 @@
 const winston = require('winston');
 
 exports.batch_size =  1024*1024*1024*30; //30GB
-exports.sqlite_path = process.env.HOME+"/autopass.sqlite";
+exports.sqlite_path = process.env.HOME+"/.config/autopass/files.sqlite";
 exports.hpss_path = "autohpss"
 
 exports.logger = {
