@@ -36,6 +36,7 @@ require('./db').getdb(function(err, db) {
                 }
                 files.push(file);
             }, function() {
+                if(files.length == 0) logger.error("not in archive - please run archive first");
                 restore(files);
             });
         } else {
@@ -87,7 +88,6 @@ require('./db').getdb(function(err, db) {
             });
         }, function(err) {
             if(err) throw err;
-            logger.debug("closing");
             db.close();
         });
     }
