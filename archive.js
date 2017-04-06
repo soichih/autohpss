@@ -16,7 +16,11 @@ if(!rootdir) {
 }
 if(!path.isAbsolute(rootdir)) {
     logger.error("Please specify an absolute path");
-    process.exit(1);
+    process.exit(2);
+}
+if(!process.env.HPSS_AUTH_METHOD || process.env.HPSS_AUTH_METHOD != "keytab") {
+    logger.error("Please configure HPSS keytab. You can try genkeytab");
+    process.exit(3);
 }
 
 require('./db').getdb(function(err, db) {
@@ -32,9 +36,9 @@ require('./db').getdb(function(err, db) {
             if(err) logger.error(err);
             handle_batch(function(err) {
                 if(err) logger.error(err);
-                logger.info("closing..");
+                logger.debug("closing db...");
                 db.close(function() {
-                    logger.info("closed");
+                    logger.debug("closed");
                 });
             });
         });
@@ -127,22 +131,4 @@ require('./db').getdb(function(err, db) {
             htar.stdin.end();
         });
     }
-
 });
-
-/*
-logger.info("walking directories to find files that needs to be archived");
-async.eachSeries(config.rootdirs, function(rootdir, next_dir) {
-    walk(rootdir, handle_batch, next_dir);
-}, function(err) {
-    if(err) logger.error(err);
-    handle_batch(function(err) {
-        if(err) logger.error(err);
-        logger.info("closing..");
-        db.close(function() {
-            logger.info("closed");
-        });
-    });
-});
-*/
-

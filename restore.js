@@ -15,6 +15,10 @@ if(!path) {
     logger.error("Please specify path (filename or directory) to restore");
     process.exit(1);
 }
+if(!process.env.HPSS_AUTH_METHOD || process.env.HPSS_AUTH_METHOD != "keytab") {
+    logger.error("Please configure HPSS keytab. You can try genkeytab");
+    process.exit(3);
+}
 
 require('./db').getdb(function(err, db) {
     if(err) throw err;
