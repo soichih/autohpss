@@ -4,11 +4,21 @@ The simplest, most straightforward way to archive and restore stuff to/from HPSS
 
 ## Prerequisite
 
-This system assumes you have HPSS(SDA) access..
+This system assumes you have HPSS(SDA) account..
 > https://kb.iu.edu/d/alja 
 
 and you have keytab based authentication configured.
 > https://kb.iu.edu/d/aumh
+
+You can use `kktgen` command to easily setup your keytab
+
+```
+$ module load nodejs
+$ kktgen
+IU username: hayashis
+IU password: 
+Keytab successfully created.
+```
 
 Once configured, you should be able to run `hsi ls` without entering user/pass.
 
