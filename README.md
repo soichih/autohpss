@@ -4,13 +4,13 @@ The simplest, most straightforward way to archive and restore stuff to/from HPSS
 
 ## Prerequisite
 
-This system assumes you have HPSS(SDA) account..
-> https://kb.iu.edu/d/alja 
+This system assumes you have HPSS(SDA) account.. If not, create it at 
 
-and you have keytab based authentication configured.
-> https://kb.iu.edu/d/aumh
+> https://access.iu.edu/Accounts
 
-You can use `kktgen` command to easily setup your keytab
+(Undergraduate needs a faculty sponsor (see https://kb.iu.edu/d/aczn)
+
+Then, use `kktgen` command to setup your keytab.
 
 ```
 $ module load nodejs
@@ -18,26 +18,6 @@ $ kktgen
 IU username: hayashis
 IU password: 
 Keytab successfully created.
-```
-
-Once configured, you should be able to run `hsi ls` without entering user/pass.
-
-```
-$ module load hpss
-$ hsi ls
-/hpss/h/a/hayashis:
-_test/          backup/         chunk/          Soichi's Test/  test.tar        
-autohpss/       barn.tar        isos/           test/           
-```
-
-If you have question on how to do this, please contact me.
-
-## Installation
-
-It's already installed on Karst, but if you want to install this on other systems, do..
-
-```
-$ sudo npm install autohpss -g
 ```
 
 ## archive
@@ -50,7 +30,7 @@ $ archive /N/dc2/projects/o3d/O3D_STN
 ```
 
 `archive` command will recursively walk through a specified directory and find
-any files that are new, or modified since you run this command. It then creates batches of files (roughtly 30GB in size) 
+any files that are new, or modified since you previously run this command. It then creates batches of files (roughtly 30GB in size) 
 and store them to your SDA account using htar. List of files and modified dates will be stored in local sqlite3 DB (~/.config/autohpss)
 
 Path needs to be an absolute path.
