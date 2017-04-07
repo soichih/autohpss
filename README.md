@@ -40,16 +40,16 @@ It's already installed on Karst, but if you want to install this on other system
 $ sudo npm install autohpss -g
 ```
 
-## This system has 2 components
+## archive
 
-1) archive
+In order to archive your files, directories, simply run archive command.
 
 ```
 $ module load nodejs
 $ archive /N/dc2/projects/o3d/O3D_STN
 ```
 
-`archive` command takes a directory name to archive. archive command will recurviely walk through a specified directory and find
+`archive` command will recursively walk through a specified directory and find
 any files that are new, or modified since you run this command. It then creates batches of files (roughtly 30GB in size) 
 and store them to your SDA account using htar. List of files and modified dates will be stored in local sqlite3 DB (~/.config/autohpss)
 
@@ -57,22 +57,22 @@ Path needs to be an absolute path.
 
 You should run archive periodically, or setup a cron job on a machine that you have access to which will 1) ssh to karst 2) run archive at desired interval. Please note - arhcive command will store all files that are modified (not just new). To prevent too many copies to be created in HPSS, you should either not archive those files, or archive them less frequently. In the future, I will provide a functionality to automatically purge older versions of the same file in HPSS (maybe only keep 3 latest copies?)
 
-2) restore 
+## restore 
+
+To restore files, sipmly run restore command.
 
 ```
 $ module load nodejs
 $ restore /N/dc2/projects/o3d/O3D_STN/derivatives/preprocess/sub-0001
 ```
 
-You can run `restore` command in login node, or from your workflow script (script that's passed to pbs) to restore files / directories 
-recursively inside the specified directory.  If a file exists, it skips. So even though you have 100s of files archived, 
-unless they were purged by dc2 system, the restore command will do nothing most of the time - it only restores if files are gone missing.
+`restore` command will restore all files that are archived under specified directory. If files already exist, restore will skip the file and do nothing, so you are safe to run this command at the top of your script everytime you run it.
 
 ## Use-case
 
-For any workflow that read/write data from dc2, update it so that before it runs the main part of your workflow, for each input file that it uses, run restore command on each file (*only restore files that you actually use!*) to make sure that they exist on dc2. Be sure to add extra walltime in case files don't exist on dc2 and need to pull from HPSS tape (2-3 hours?)
+For any workflow that read data from dc2, update it so that you will run restore command for each input file or directory that you use in your workflow (*only restore files that you actually use!*). Be sure to add extra walltime in case files don't exist on dc2 and need to pull from HPSS tape (2-3 hours?)
 
-archive command can run on much less granular fashion than restore, but you should avoid archiving the entire project directory.. (Do you really need everything there?) archive command will archive *all* new/modified files under the specified directory. You can run it after your workflow successfull completes, or automatically(via cron) once a week/month depending on your archival need. 
+archive command can run on much less granular fashion than restore, but you should avoid archiving the entire project directory (Do you really need everything there?). `archive` command will archive *all* new/modified files under the specified directory. You can run it after your workflow successfull completes, or automatically(via cron) once a week/month depending on your archival need. 
 
 ## Why does this exist?
 
