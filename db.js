@@ -17,6 +17,7 @@ exports.getdb = function(cb) {
         db.serialize(()=>{
             db.run("CREATE TABLE IF NOT EXISTS files (path TEXT, mtime INTEGER, tarid INTEGER)");
             db.run("CREATE INDEX IF NOT EXISTS files_index ON files (path,mtime)");
+            db.run("PRAGMA synchronous=OFF");
         });
         cb(null, db);
     });
