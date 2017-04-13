@@ -20,6 +20,14 @@ IU password:
 Keytab successfully created.
 ```
 
+kktgen will edit your .bashrc to include a few keytab related export. If it can't update it, it will display an extra instruction.
+
+Finally, run bash to reload your .bashrc
+
+```
+$ bash
+```
+
 ## archive
 
 In order to archive your files, directories, simply run archive command.
@@ -39,7 +47,7 @@ You should run archive periodically, or setup a cron job on a machine that you h
 
 ## restore 
 
-To restore files, sipmly run restore command.
+To restore files, simply run restore command.
 
 ```
 $ module load nodejs
