@@ -34,6 +34,7 @@ In order to archive your files, directories, simply run archive command.
 
 ```
 $ module load nodejs
+$ module load hpss
 $ archive /N/dc2/projects/o3d/O3D_STN
 ```
 
@@ -45,16 +46,21 @@ Path needs to be an absolute path.
 
 You should run archive periodically, or setup a cron job on a machine that you have access to which will 1) ssh to karst 2) run archive at desired interval. Please note - arhcive command will store all files that are modified (not just new). To prevent too many copies to be created in HPSS, you should either not archive those files, or archive them less frequently. In the future, I will provide a functionality to automatically purge older versions of the same file in HPSS (maybe only keep 3 latest copies?)
 
+You can specify `-d` to do dry-run of archive to show which files needs to be archived.
+
 ## restore 
 
 To restore files, simply run restore command.
 
 ```
 $ module load nodejs
+$ module load hpss
 $ restore /N/dc2/projects/o3d/O3D_STN/derivatives/preprocess/sub-0001
 ```
 
 `restore` command will restore all files that are archived under specified directory. If files already exist, restore will skip the file and do nothing, so you are safe to run this command at the top of your script everytime you run it.
+
+You can specify `-d` to do dry-run of resotre to show which files needs to be restored.
 
 ## Use-case
 

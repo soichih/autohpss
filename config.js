@@ -11,10 +11,12 @@ exports.logger = {
         transports: [
             //display all logs to console
             new winston.transports.Console({
+                /*
                 timestamp: function() {
                     var d = new Date();
                     return d.toString(); 
                 },
+                */
                 level: 'debug',
                 colorize: true
             }),
