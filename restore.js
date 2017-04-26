@@ -3,7 +3,6 @@
 const fs = require('fs');
 const winston = require('winston');
 const async = require('async');
-const mkdirp = require('mkdirp');
 const assert = require('assert');
 const spawn = require('child_process').spawn;
 const argv = require('minimist')(process.argv.slice(2), {boolean:'d'});
@@ -57,7 +56,10 @@ function run() {
                     }
                     files.push(file);
                 }, function() {
-                    if(files.length == 0) logger.error("not in archive - please run archive first");
+                    if(files.length == 0) {
+                        logger.error("not in archive - please run archive first");
+                        process.exit(1);
+                    }
                     restore(files);
                 });
             } else {
@@ -72,7 +74,7 @@ function run() {
                     if(err) {
                         if(argv.d) {
                             logger.info("need-to-restore", file.path);
-                            next_file();
+                            return next_file();
                         } else {
                             //file doesn't exist
                             var hpss_path = config.hpss_path+"/"+file.tarid+".tar";
@@ -86,15 +88,16 @@ function run() {
                                 console.error(data.toString());
                             }); 
                             htar.on('close', (code)=>{
-                                if(code != 0) next_file("htar -x failed with code:"+code);
-                                else {
+                                if(code != 0) {
+                                    return next_file("htar -x failed with code:"+code);
+                                } else {
                                     //-m updates the modified time locally, so I need to update the mtime
                                     fs.stat(file.path, (err, new_stats)=>{
-                                        if(err) next_file(err);
+                                        if(err) return next_file(err);
                                         logger.debug("successfully restored - now updating mtime in archive", file, new_stats.mtime.getTime());
                                         db.run("UPDATE files SET mtime = ? WHERE path = ? and mtime = ?", 
                                             new_stats.mtime.getTime(), file.path, file.max_mtime);
-                                        next_file();
+                                        return next_file();
                                     });
                                 }
                             });
@@ -105,18 +108,20 @@ function run() {
                         if(file.max_mtime < mtime) {
                             //"already exists, but file in archive is stale. You should rerun archive.");
                             logger.warn("modified (you should re-archive)", file.path);
-                            next_file();
+                            return next_file();
                         } else {
                             //logger.debug("file", file.max_mtime, "mtime", mtime);
                             assert(file.max_mtime == mtime);
-                            logger.debug("up-to-date",file.path);
-                            next_file();
+                            logger.info("up-to-date",file.path);
+                            return next_file();
                         }
                     }
                 });
             }, function(err) {
                 if(err) throw err;
-                db.close();
+                db.close(function() {
+                    //done
+                });
             });
         }
     });

@@ -17,8 +17,8 @@ exports.logger = {
                     return d.toString(); 
                 },
                 */
-                level: 'debug',
-                colorize: true
+                level: (process.env.DEBUG?'debug':'info'),
+                colorize: process.stdout.isTTY,
             }),
         ]
     },
