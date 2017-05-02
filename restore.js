@@ -18,8 +18,10 @@ if(argv.h) {
 
 var path = argv._[0];
 if(!path) {
-    logger.error("Please specify path (filename or directory) to restore");
-    process.exit(1);
+    //logger.error("Please specify path (filename or directory) to restore");
+    //process.exit(1);
+    logger.info("file/dir path not specified - using current directory");
+    path = process.cwd();
 }
 if(!process.env.HPSS_AUTH_METHOD || process.env.HPSS_AUTH_METHOD != "keytab") {
     logger.error("Please configure HPSS keytab. You can try genkeytab");
@@ -57,7 +59,7 @@ function run() {
                     files.push(file);
                 }, function() {
                     if(files.length == 0) {
-                        logger.error("not in archive - please run archive first");
+                        logger.error("not in archive");
                         process.exit(1);
                     }
                     restore(files);

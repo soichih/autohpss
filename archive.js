@@ -18,8 +18,10 @@ if(argv.h) {
 
 var rootdir = argv._[0];
 if(!rootdir) {
-    logger.error("Please specify directory name to archive");
-    process.exit(1);
+    logger.info("archive directory not specified - using local directory");
+    rootdir = process.cwd();
+    //logger.error("Please specify directory name to archive");
+    //process.exit(1);
 }
 if(!path.isAbsolute(rootdir)) {
     logger.error("Please specify an absolute path");
