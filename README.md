@@ -28,10 +28,11 @@ Finally, run bash to reload your .bashrc
 $ bash
 ```
 
-autohpss is currently loaded from nodejs / npm repository. To use globally installed autohpss, simply load nodejs and hpss modules
+autohpss is currently installed on Karst and BigRed2 as nodejs/npm module. 
 
 ```
 $ module load nodejs hpss
+$ archive -h
 ```
 
 ## archive
