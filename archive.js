@@ -6,10 +6,10 @@ const config = require('./config');
 const async = require('async');
 const path = require('path');
 const argv = require('minimist')(process.argv.slice(2), {boolean:'d'});
-const which = require('which');
 
 const spawn = require('child_process').spawn;
 const logger = new winston.Logger(config.logger.winston);
+const kk = require('./kk');
 
 if(argv.h) {
     console.log(fs.readFileSync(__dirname+"/README.md").toString());
@@ -27,19 +27,13 @@ if(!path.isAbsolute(rootdir)) {
     logger.error("Please specify an absolute path");
     process.exit(2);
 }
-if(!process.env.HPSS_AUTH_METHOD || process.env.HPSS_AUTH_METHOD != "keytab") {
-    logger.error("Please configure HPSS keytab. You can try genkeytab");
-    process.exit(3);
-}
+
+
 if(argv.d) {
     logger.info("Running in dry-run mode");
 }
 
-which('htar', (err)=>{
-    if(err) {
-        logger.error("can't find htar command in path. Try \"module load hpss\"?");
-    } else run();
-});
+kk.testSync(run);
 
 function run() {
     require('./db').getdb(function(err, db) {
