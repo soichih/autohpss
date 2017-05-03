@@ -8,9 +8,9 @@ This system assumes you have HPSS(SDA) account.. If not, create it at
 
 > https://access.iu.edu/Accounts
 
-(Undergraduate needs a faculty sponsor (see https://kb.iu.edu/d/aczn)
+Undergraduate needs a faculty sponsor (see https://kb.iu.edu/d/aczn). If you are eligible but not seeing SDA account listed, please send email to store-admin@iu.edu and ask them to give you access to SDA.
 
-Then, use `kktgen` command to setup your keytab.
+autohpss uses `kerberos token` to access HSI. If you don't know what it is, simply use `kktgen` command to setup your keytab.
 
 ```
 $ module load nodejs
@@ -20,20 +20,15 @@ IU password:
 Keytab successfully created.
 ```
 
-kktgen will edit your .bashrc to include a few keytab related export. If it can't update it, it will display an extra instruction.
-
-Finally, run bash to reload your .bashrc
-
-```
-$ bash
-```
+## Loading autohpss
 
 autohpss is currently installed on Karst and BigRed2 as nodejs/npm module. 
 
 ```
 $ module load nodejs hpss
-$ archive -h
 ```
+
+You are now ready to use autohpss commands!
 
 ## archive
 
