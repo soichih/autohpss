@@ -1,6 +1,6 @@
 # Automated HPSS archive / retrieval system
 
-The simplest, most straightforward way to archive and restore stuff to/from HPSS(SDA).
+A simple, straightforward way to archive and restore stuff to/from HPSS(SDA).
 
 ## Prerequisite
 
