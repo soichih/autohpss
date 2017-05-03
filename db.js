@@ -1,5 +1,3 @@
-#!/bin/env node
-
 const winston = require('winston');
 const config = require('./config');
 const sqlite3 = require('sqlite3');

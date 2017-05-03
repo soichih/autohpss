@@ -1,5 +1,3 @@
-#!/bin/env node
-
 const winston = require('winston');
 const child_process = require('child_process');
 const which = require('which');
