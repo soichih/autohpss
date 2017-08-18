@@ -6,6 +6,7 @@ const async = require('async');
 const assert = require('assert');
 const spawn = require('child_process').spawn;
 const argv = require('minimist')(process.argv.slice(2), {boolean:'d'});
+const path = require('path');
 
 const config = require('./config');
 const logger = new winston.Logger(config.logger.winston);
@@ -16,12 +17,27 @@ if(argv.h) {
     process.exit(0);
 }
 
-var path = argv._[0];
-if(!path) {
-    //logger.error("Please specify path (filename or directory) to restore");
-    //process.exit(1);
-    logger.info("file/dir path not specified - using current directory");
-    path = process.cwd();
+var _path = argv._[0];
+if(!_path) {
+    //when we deprecate non-real path, we can just use process.cwd()
+    if(process.env.PWD)  {
+        logger.info("file/dir path not specified - using PWD");
+        _path = process.env.PWD;
+    } else {
+        logger.error("file/dir path not specified and PWD is not set");
+        process.exit(2);
+    }
+}
+
+if(!path.isAbsolute(_path)) {
+    //when we deprecate non-real path, we can just do rootdir = path.resolve(rootdir)
+    if(process.env.PWD) {
+        _path = process.env.PWD+'/'+_path;
+        logger.info("relative path specified. Using PWD:", _path);
+    } else {
+        logger.error("PWD not set.. please specify an absolute path");
+        process.exit(2);
+    }
 }
 
 if(argv.d) {
@@ -35,24 +51,28 @@ function run() {
         if(err) throw err;
 
         //let's try finding as a file
-        db.get("SELECT path, max(mtime) as max_mtime, tarid FROM files WHERE path = ? GROUP BY path", path, function(err, file) {
+        let realpath = fs.realpathSync(_path);
+        db.get("SELECT path, max(mtime) as max_mtime, tarid FROM files WHERE (path = ? or path = ?) GROUP BY path", _path, realpath, function(err, file) {
             if(err) {
                 if(err.code == "SQLITE_BUSY") return logger.error("Database locked. Archive process still running?");
                 throw err;
             }
             if(!file) {
-                //not archived, or it's directory - let's try as directory
-                if(path[path.length-1] != '/') path = path+"/"; //append / to prevent picking up /dirA, /dirB, /dirC..
+                //not archived, or it's directory - let's try as directory..
+                //append / to prevent picking up /dirA, /dirB, /dirC..
+                if(_path[_path.length-1] != '/') _path = _path+"/"; 
+                if(realpath[realpath.length-1] != '/') realpath = realpath+"/"; 
+
                 var files = [];
-                db.each("SELECT path, max(mtime) as max_mtime, tarid FROM files WHERE path LIKE ? GROUP BY path", [path+"%"], function(err, file) {
+                db.each("SELECT path, max(mtime) as max_mtime, tarid FROM files WHERE (path LIKE ? or path LIKE ?) GROUP BY path", [_path+"%", realpath+"%"], function(err, file) {
                     if(err) {
-                        if(err.code == "SQLITE_BUSY") return logger.error("Database locked. Archive process still running?");
+                        if(err.code == "SQLITE_BUSY") return logger.error("Database locked. Previous archive process still running?");
                         throw err;
                     }
                     files.push(file);
                 }, function() {
                     if(files.length == 0) {
-                        logger.error("not in archive");
+                        logger.error(_path, "not in archive");
                         process.exit(1);
                     }
                     restore(files);
@@ -64,7 +84,7 @@ function run() {
         });
 
         function restore(files) {
-            async.forEach(files, function(file, next_file) {
+            async.eachSeries(files, function(file, next_file) {
                 fs.stat(file.path, (err, stats)=>{
                     if(err) {
                         if(argv.d) {
@@ -73,13 +93,13 @@ function run() {
                         } else {
                             //file doesn't exist
                             var hpss_path = config.hpss_path+"/"+file.tarid+".tar";
-                            //var dest = file.path.substring(1); //trim leading '/' to silence htar warning
                             logger.info("restoring",file.path,"from",hpss_path);
+                            logger.debug('htar', ['-x', '-v', '-m', '-p', '-f', hpss_path, file.path], {cwd: "/"});
                             var htar = spawn('htar', ['-x', '-v', '-m', '-p', '-f', hpss_path, file.path], {cwd: "/"});
-                            htar.stdout.on('data', (data)=>{
+                            if(htar.stdout) htar.stdout.on('data', (data)=>{
                                 console.log(data.toString());
                             }); 
-                            htar.stderr.on('data', (data)=>{
+                            if(htar.stderr) htar.stderr.on('data', (data)=>{
                                 console.error(data.toString());
                             }); 
                             htar.on('close', (code)=>{

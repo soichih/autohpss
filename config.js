@@ -1,13 +1,15 @@
 const winston = require('winston');
 
 exports.batch_size =  1024*1024*1024*30; //30GB
-exports.sqlite_path = process.env.HOME+"/../Karst/.config/autopass/files.sqlite";
 exports.hpss_path = "autohpss"
+
+//use ~/../Karst/.config so that the same DB will be used across different systems
+//TODO - should I just create ~/../.config/?
+exports.sqlite_path = process.env.HOME+"/../Karst/.config/autopass/files.sqlite";
 
 exports.logger = {
     winston: {
         //hide headers which may contain jwt
-        //requestWhitelist: ['url', /*'headers',*/ 'method', 'httpVersion', 'originalUrl', 'query'],
         transports: [
             //display all logs to console
             new winston.transports.Console({

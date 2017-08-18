@@ -57,6 +57,13 @@ You can also specify a Path that you'd like to archive
 $ archive /N/dc2/projects/o3d/O3D_STN
 ```
 
+Path can be a relative path (it will be automatically resolved to the absolute path)
+
+```
+$ cd /N/dc2/projects/o3d
+$ archive O3D_STN
+```
+
 ## restore 
 
 To restore files, simply run restore command with the directory / file path that you'd like to restore.
