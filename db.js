@@ -12,6 +12,7 @@ exports.getdb = function(cb) {
     mkdirp(path.dirname(config.sqlite_path), (err)=>{
         if (err) return cb(err);
         var db = new sqlite3.Database(config.sqlite_path);
+        logger.debug("using db path", config.sqlite_path);
         db.serialize(()=>{
             db.run("CREATE TABLE IF NOT EXISTS files (path TEXT, mtime INTEGER, tarid INTEGER)");
             db.run("CREATE INDEX IF NOT EXISTS files_index ON files (path,mtime)");
