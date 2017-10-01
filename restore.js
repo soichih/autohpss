@@ -29,7 +29,7 @@ if(!_path) {
     }
 }
 
-if(!path.isAbsolute(_path)) {
+if(!path.isAbsolute(_path.toString())) {
     //when we deprecate non-real path, we can just do rootdir = path.resolve(rootdir)
     if(process.env.PWD) {
         _path = process.env.PWD+'/'+_path;
@@ -97,10 +97,10 @@ function run() {
                             logger.debug('htar', ['-x', '-v', '-m', '-p', '-f', hpss_path, file.path], {cwd: "/"});
                             var htar = spawn('htar', ['-x', '-v', '-m', '-p', '-f', hpss_path, file.path], {cwd: "/"});
                             if(htar.stdout) htar.stdout.on('data', (data)=>{
-                                console.log(data.toString());
+                                logger.debug(data.toString());
                             }); 
                             if(htar.stderr) htar.stderr.on('data', (data)=>{
-                                console.error(data.toString());
+                                logger.error(data.toString());
                             }); 
                             htar.on('close', (code)=>{
                                 if(code != 0) {
@@ -140,5 +140,5 @@ function run() {
             });
         }
     });
-}/*end..run()*/
+}
 

@@ -27,7 +27,7 @@ if(!rootdir) {
         process.exit(2);
     }
 }
-if(!path.isAbsolute(rootdir)) {
+if(!path.isAbsolute(rootdir.toString())) {
     //when we deprecate non-real path, we can just do rootdir = path.resolve(rootdir)
     if(process.env.PWD) {
         rootdir = process.env.PWD+'/'+rootdir;
@@ -38,13 +38,11 @@ if(!path.isAbsolute(rootdir)) {
     }
 }
 
-if(argv.d) {
-    logger.info("Running in dry-run mode");
-}
+if(argv.d) logger.info("Running in dry-run mode");
 
-kk.testSync(run);
+kk.testSync(()=>{
+    //test ok.. proceed
 
-function run() {
     require('./db').getdb(function(err, db) {
         if(err) throw err;
 
@@ -60,10 +58,13 @@ function run() {
                         if(err) errors.push(err);
                         logger.info("closing db...");
                         db.close(function() {
-                            //all done
+                            
+                            //all done. report error..
                             if(errors.length > 0) {
-                                logger.error("couldn't archive all files");
-                                logger.error(errors);
+                                logger.error("couldn't archive following files...");
+                                errors.forEach(err=>{
+                                    logger.error(err);
+                                });
                                 process.exit(1);
                             }
                         });
@@ -78,7 +79,7 @@ function run() {
                             //all done
                             if(errors.length > 0) {
                                 logger.error("couldn't archive all files");
-                                logger.error(errors);
+                                //logger.error(errors);
                                 process.exit(1);
                             }
                         });
@@ -98,24 +99,32 @@ function run() {
         var newfiles = [];
 
         function handle_file(fullpath, stats, cb, full) {
-            mtime = stats.mtime.getTime();
-            var real_fullpath = fs.realpathSync(fullpath);
-            //search using both old and real path for backward compatibility (until we deprecate old paths)
-            //I wonder if I could just migrate old paths in db?
-            db.get("SELECT * FROM files WHERE (path = ? or path = ?) and mtime = ?", [fullpath, real_fullpath, mtime], 
-            function(err, row) {
+            
+            //check to see if I can read the file to begin with..
+            fs.access(fullpath, fs.constants.R_OK, err=>{
                 if(err) {
-                    errors.push(err);
+                    errors.push("can't read: "+fullpath);
                     return cb();
                 }
-                if(!row) {
-                    logger.info("need-to-archive", real_fullpath, mtime);
-                    newfiles.push({path: real_fullpath, mtime: mtime});
-                    total_size += stats.size; 
-                    if(total_size > config.batch_size) {
-                        full(cb); //I have a full batch!
+
+                //search using both old and real path for backward compatibility (until we deprecate old paths)
+                //I wonder if I could just migrate old paths in db?
+                var real_fullpath = fs.realpathSync(fullpath);
+                var mtime = stats.mtime.getTime();
+                db.get("SELECT * FROM files WHERE (path = ? or path = ?) and mtime = ?", [fullpath, real_fullpath, mtime], (err, row)=>{
+                    if(err) {
+                        errors.push(err);
+                        return cb();
+                    }
+                    if(!row) {
+                        logger.info("need-to-archive", real_fullpath, mtime);
+                        newfiles.push({path: real_fullpath, mtime: mtime});
+                        total_size += stats.size; 
+                        if(total_size > config.batch_size) {
+                            full(cb); //I have a full batch!
+                        } else cb();
                     } else cb();
-                } else cb();
+                });
             });
         }
 
@@ -199,4 +208,4 @@ function run() {
             });
         }
     });
-}
+});
