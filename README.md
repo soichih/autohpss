@@ -45,7 +45,7 @@ and transfer them to your SDA account using htar.
 
 autohpss keeps up with list of files in local sqlite3 DB (~/.config/autohpss) along with modified data and which htar archive the files belongs.
 
-You should run `archive` periodically, or setup a cron job on a machine that you have access to which will 1) ssh to karst 2) run archive at desired interval. Please note - arhcive command will store all files that are modified (not just new). If you have a files that are frequently updated, to prevent too many copies to be created in HPSS, you should either not archive those files, or archive them less frequently. 
+You can run `archive` periodically by setting up a cron job which will 1) ssh to karst 2) run archive at desired interval. Please note that, the arhcive command will re-archive files if they are modified since they were last archived.  If you have a files that are frequently modified, you should either not archive those files or archive them less frequently to prevent too many copies of those files to be created in HPSS.
 
 > In the future, I will provide a functionality to automatically purge older versions of the same file in HPSS (maybe only keep 3 latest copies?)
 
@@ -105,11 +105,12 @@ archive /N/dc2/scratch/hayashis/neuro/derivatives
 
 You could run `archive` command on your entire project directories, but you should avoid if if you could; `archive` command will archive *all* new/modified files under the specified directory recursively. 
 
-## Why does this exist?
+## How can I be sure that my files are properly archived?
 
-Currently, dc2 is >90% full. I believe that a good chunk of that data [according to users who I talked to] is due to user artificially retaining data by running "access time hacking" script to change the access time of the files within user's directory. They do this because they don't have access to SDA or don't have time to learn about SDA/HPSS. 
+After successful archive, you can test to make sure that your files are safely archived by renaming a few files that you have archived, then running restore command on those files to see if the files with original filename re-appears. You can also run `diff` command betwen the renamed file and files that are restored to be sure that they are identical. 
 
-This system will allow those users easier way to manage archive / restore files so that they no longer have to rely on access time hacking scripts, which will then reduces the disk usage on dc2.
+
+
 
 
 

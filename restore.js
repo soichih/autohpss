@@ -100,7 +100,11 @@ function run() {
                                 logger.debug(data.toString());
                             }); 
                             if(htar.stderr) htar.stderr.on('data', (data)=>{
-                                logger.error(data.toString());
+                                var msg = data.toString();
+                                //assuming we receive one line at a time..
+                                if(msg == "Warning: \"Network Options\" section not found in HPSS.conf file\n") return;
+                                if(msg == "HTAR: Removing leading `/' from absolute path names in the archive\n") return;
+                                logger.error(msg);
                             }); 
                             htar.on('close', (code)=>{
                                 if(code != 0) {
