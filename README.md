@@ -2,6 +2,16 @@
 
 A simple, straightforward way to archive and restore stuff to/from HPSS(SDA).
 
+
+### WARNING: dc2 deprecatation
+
+IU dc2 has been deprecated and replaced by Slate. To restore data archived in dc2 to slate, you will need to fool autohpss because it can only archive/restore on the same filepath.
+
+You can do this by running autohpss via singularity and bind mounting slate as dc2/scratch, for example
+
+> singularity exec -B /N/slate:/N/dc2/scratch docker://soichih/autohpss restore /N/dc2/scratch/hayashis/sca
+
+
 ## Prerequisite
 
 This system assumes you have HPSS(SDA) account.. If not, create it at 
